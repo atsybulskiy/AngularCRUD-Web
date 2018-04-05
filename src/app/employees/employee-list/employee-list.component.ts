@@ -1,8 +1,9 @@
 import {Component, OnInit} from '@angular/core';
+import {ToastrService} from 'ngx-toastr';
 
 import {EmployeeService} from '../shared/employee.service';
 import {Employee} from '../shared/employee.model';
-import {ToastrService} from 'ngx-toastr';
+import {EmployeeDto} from '../../../api/EmployeeDto';
 
 @Component({
   selector: 'app-employee-list',
@@ -10,25 +11,27 @@ import {ToastrService} from 'ngx-toastr';
   styleUrls: ['./employee-list.component.css']
 })
 export class EmployeeListComponent implements OnInit {
+  employeeList: EmployeeDto[];
 
   constructor(private employeeService: EmployeeService,
               private toastr: ToastrService) {
   }
 
-  ngOnInit() {
-    this.employeeService.getEmployeeList();
+  async ngOnInit() {
+    await this.employeeService.getEmployeeList();
+    console.log(this.employeeService.getEmployeeList());
   }
 
   showForEdit(emp: Employee) {
-    this.employeeService.selectedEmployee = Object.assign({}, emp);
+    this.employeeService.selectedEmployee = {...emp};
   }
 
 
   onDelete(id: number) {
     if (confirm('Are you sure to delete this record ?')) {
       this.employeeService.deleteEmployee(id)
-        .subscribe(x => {
-          this.employeeService.getEmployeeList();
+        .subscribe(async () => {
+          await this.employeeService.getEmployeeList();
           this.toastr.warning('Deleted Successfully', 'Employee Register');
         });
     }
